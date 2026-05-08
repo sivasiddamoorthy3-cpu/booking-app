@@ -5,56 +5,32 @@ import (
 	"strings"
 )
 
+const conferenceTickets uint = 50
+
+var (
+	bookings              = []string{}
+	conferenceName        = "Go Conference"
+	remainingTickets uint = 50
+)
+
 func main() {
-	var conferenceName = "Go Conference"
-	const conferenceTickets = 50
-	var remainingTickets uint = 50
 
-	var firstName string
-	var lastName string
-	var email string
-	var userTickets uint
-	var bookings []string
-
-	fmt.Printf("Welcome to %v booking application\n", conferenceName)
-	fmt.Printf("We have a total of %v tickets and %v are still available.\n", conferenceTickets, remainingTickets)
-	fmt.Println("Get your tickets to attend")
+	// Greeting the Users with welcome message with the conference details
+	greetUsers()
 
 	for {
 		// Get user input for booking
-		fmt.Println("Enter your first name:")
-		fmt.Scan(&firstName)
-		fmt.Println("Enter your last name:")
-		fmt.Scan(&lastName)
-		fmt.Println("Enter your email:")
-		fmt.Scan(&email)
-		fmt.Println("Enter number of tickets:")
-		fmt.Scan(&userTickets)
+		firstName, lastName, email, userTickets := getUserInput()
 
-		// Validate user input before booking
-		// Validate the number of tickets requested is greater than 0 and less than or equal to remaining tickets
-		isValidName := len(firstName) >= 2 && len(lastName) >= 2
-		isValidEmail := len(email) >= 6 && strings.Contains(email, "@")
-		// Validate the number of tickets requested does not exceed remaining tickets.
-		// This check is important to prevent overbooking and ensure that we do not sell more tickets than we have available.
-		isValidTicketNumber := userTickets > 0 && userTickets <= remainingTickets
+		// Validate user provided info in the request
+		isValidName, isValidEmail, isValidTicketNumber := validateUserInputRequest(firstName, lastName, email, userTickets)
 
 		if isValidName && isValidEmail && isValidTicketNumber {
-			fmt.Printf("Thank you %v %v for your booking. You have booked %v tickets. A confirmation email will be sent to %v.\n", firstName, lastName, userTickets, email)
 
-			// Update remaining tickets after successful booking.
-			remainingTickets = remainingTickets - userTickets
-			bookings = append(bookings, firstName+" "+lastName)
-			fmt.Printf("%v tickets remaining for %v\n", remainingTickets, conferenceName)
+			bookTickets(firstName, lastName, email, userTickets)
 
-			firstNames := []string{}
-			// Loop through the bookings and extract the first names.
-			for _, booking := range bookings {
-				// Split the booking string into first name and last name using strings.Fields, which splits the string by whitespace.
-				// This allows us to easily extract the first name, which is the first element of the resulting slice.
-				var names = strings.Fields(booking)
-				firstNames = append(firstNames, names[0])
-			}
+			// Getting the first names of the booked users.
+			firstNames := getFirstNames()
 			fmt.Printf("The first names of all bookings are: %v\n", firstNames)
 
 			if remainingTickets == 0 {
@@ -76,4 +52,64 @@ func main() {
 			}
 		}
 	}
+}
+
+func greetUsers() {
+	fmt.Printf("Welcome to %v booking application.\n", conferenceName)
+	fmt.Printf("We have a total of %v tickets and %v are still available.\n", conferenceTickets, remainingTickets)
+	fmt.Println("Get your tickets to attend.")
+}
+
+func getFirstNames() []string {
+	firstNames := []string{}
+	// Loop through the bookings and extract the first names.
+	for _, booking := range bookings {
+		// Split the booking string into first name and last name using strings.Fields, which splits the string by whitespace.
+		// This allows us to easily extract the first name, which is the first element of the resulting slice.
+		var names = strings.Fields(booking)
+		firstNames = append(firstNames, names[0])
+	}
+
+	return firstNames
+}
+
+func validateUserInputRequest(firstName, lastName, email string, userTickets uint) (bool, bool, bool) {
+	// Validate user input before booking
+	// Validate the number of tickets requested is greater than 0 and less than or equal to remaining tickets
+	isValidName := len(firstName) >= 2 && len(lastName) >= 2
+	isValidEmail := len(email) >= 6 && strings.Contains(email, "@")
+	// Validate the number of tickets requested does not exceed remaining tickets.
+	// This check is important to prevent overbooking and ensure that we do not sell more tickets than we have available.
+	isValidTicketNumber := userTickets > 0 && userTickets <= remainingTickets
+
+	return isValidName, isValidEmail, isValidTicketNumber
+}
+
+func getUserInput() (string, string, string, uint) {
+	var firstName string
+	var lastName string
+	var email string
+	var userTickets uint
+
+	// Get user input for booking
+	fmt.Println("Enter your first name:")
+	fmt.Scan(&firstName)
+	fmt.Println("Enter your last name:")
+	fmt.Scan(&lastName)
+	fmt.Println("Enter your email:")
+	fmt.Scan(&email)
+	fmt.Println("Enter number of tickets:")
+	fmt.Scan(&userTickets)
+
+	return firstName, lastName, email, userTickets
+}
+
+// Book the tickets based on user provided info
+func bookTickets(firstName, lastName, email string, userTickets uint) {
+	fmt.Printf("Thank you %v %v for your booking. You have booked %v tickets. A confirmation email will be sent to %v.\n", firstName, lastName, userTickets, email)
+
+	// Update remaining tickets after successful booking.
+	remainingTickets = remainingTickets - userTickets
+	bookings = append(bookings, firstName+" "+lastName)
+	fmt.Printf("%v tickets remaining for %v\n", remainingTickets, conferenceName)
 }
