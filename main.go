@@ -1,14 +1,15 @@
 package main
 
 import (
+	"booking-app/helper"
 	"fmt"
-	"strings"
+	"strconv"
 )
 
 const conferenceTickets uint = 50
 
 var (
-	bookings              = []string{}
+	bookings              = make([]map[string]string, 0)
 	conferenceName        = "Go Conference"
 	remainingTickets uint = 50
 )
@@ -23,7 +24,7 @@ func main() {
 		firstName, lastName, email, userTickets := getUserInput()
 
 		// Validate user provided info in the request
-		isValidName, isValidEmail, isValidTicketNumber := validateUserInputRequest(firstName, lastName, email, userTickets)
+		isValidName, isValidEmail, isValidTicketNumber := helper.ValidateUserInputRequest(firstName, lastName, email, userTickets, remainingTickets)
 
 		if isValidName && isValidEmail && isValidTicketNumber {
 
@@ -64,25 +65,10 @@ func getFirstNames() []string {
 	firstNames := []string{}
 	// Loop through the bookings and extract the first names.
 	for _, booking := range bookings {
-		// Split the booking string into first name and last name using strings.Fields, which splits the string by whitespace.
-		// This allows us to easily extract the first name, which is the first element of the resulting slice.
-		var names = strings.Fields(booking)
-		firstNames = append(firstNames, names[0])
+		firstNames = append(firstNames, booking["firstName"])
 	}
 
 	return firstNames
-}
-
-func validateUserInputRequest(firstName, lastName, email string, userTickets uint) (bool, bool, bool) {
-	// Validate user input before booking
-	// Validate the number of tickets requested is greater than 0 and less than or equal to remaining tickets
-	isValidName := len(firstName) >= 2 && len(lastName) >= 2
-	isValidEmail := len(email) >= 6 && strings.Contains(email, "@")
-	// Validate the number of tickets requested does not exceed remaining tickets.
-	// This check is important to prevent overbooking and ensure that we do not sell more tickets than we have available.
-	isValidTicketNumber := userTickets > 0 && userTickets <= remainingTickets
-
-	return isValidName, isValidEmail, isValidTicketNumber
 }
 
 func getUserInput() (string, string, string, uint) {
@@ -110,6 +96,14 @@ func bookTickets(firstName, lastName, email string, userTickets uint) {
 
 	// Update remaining tickets after successful booking.
 	remainingTickets = remainingTickets - userTickets
-	bookings = append(bookings, firstName+" "+lastName)
+
+	userData := make(map[string]string)
+	userData["firstName"] = firstName
+	userData["lastName"] = lastName
+	userData["email"] = email
+	userData["numberOfTickets"] = strconv.FormatUint(uint64(userTickets), 10)
+
+	bookings = append(bookings, userData)
+	fmt.Printf("List of bookings for user: %v\n", bookings)
 	fmt.Printf("%v tickets remaining for %v\n", remainingTickets, conferenceName)
 }
