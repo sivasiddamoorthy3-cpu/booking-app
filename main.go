@@ -2,14 +2,14 @@ package main
 
 import (
 	"booking-app/helper"
+	"booking-app/models"
 	"fmt"
-	"strconv"
 )
 
 const conferenceTickets uint = 50
 
 var (
-	bookings              = make([]map[string]string, 0)
+	bookings              = make([]models.UserData, 0)
 	conferenceName        = "Go Conference"
 	remainingTickets uint = 50
 )
@@ -65,7 +65,7 @@ func getFirstNames() []string {
 	firstNames := []string{}
 	// Loop through the bookings and extract the first names.
 	for _, booking := range bookings {
-		firstNames = append(firstNames, booking["firstName"])
+		firstNames = append(firstNames, booking.FirstName)
 	}
 
 	return firstNames
@@ -97,11 +97,12 @@ func bookTickets(firstName, lastName, email string, userTickets uint) {
 	// Update remaining tickets after successful booking.
 	remainingTickets = remainingTickets - userTickets
 
-	userData := make(map[string]string)
-	userData["firstName"] = firstName
-	userData["lastName"] = lastName
-	userData["email"] = email
-	userData["numberOfTickets"] = strconv.FormatUint(uint64(userTickets), 10)
+	userData := models.UserData{
+		FirstName:       firstName,
+		LastName:        lastName,
+		Email:           email,
+		NumberOfTickets: userTickets,
+	}
 
 	bookings = append(bookings, userData)
 	fmt.Printf("List of bookings for user: %v\n", bookings)
